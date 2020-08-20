@@ -9,30 +9,81 @@ def reddit_authentication(config):
     redditUsername = config.get('credentials', 'reddit_Username')
     redditPassword = config.get('credentials', 'reddit_Password')
     return praw.Reddit(client_id = redditClientId,
-    client_secret = redditClientSecret,
-    username = redditUsername,
-    password = redditPassword,
-    user_agent = 'multiple-subreddit_post')
+                       client_secret = redditClientSecret,
+                       username = redditUsername,
+                       password = redditPassword,
+                       user_agent = 'multiple-subreddit_post')
+
+
 
 class post_options():
-    def __init__ (self, title, subreddit, url="", path="", flair="", inboxReplies = True, spoiler = False, originalContent = False, NSFW = False)
+    def __init__(self, title, subreddits, url = '', path = '', flair = '', inboxReplies = True, spoiler = False, originalContent = False, NSFW = False):
         self.inboxReplies = inboxReplies
         self.spoiler = spoiler
-        self.subreddit = subreddit
+        self.subreddits = subreddits
         self.title = title
         self.originalContent = originalContent
         self.NSFW = NSFW
         self.url = url
-        self.flair = "FLAIR CHOICES ON PRAW"
+        self.flair = flair 
+
+
+    def getSubreddits():
+        return self.subreddits
+
+
+
+
+def create_post():
+    title = input('Enter Title ')
+    #subreddit
+    url = input('Enter url (leave blank if using path) ')
+    path = input('Enter Path (leave blank if using url) ')
+    flair = ''
+
+    inboxReplies = input('Disable Inbox Replies? (y/n) ')
+    if inboxReplies == 'y':
+        inboxReplies = False
+    else:
+        inboxReplies = True
+
+    spoiler = input('Enable Spoiler? (y/n) ')
+    if spoiler == 'y':
+        spoiler = True
+    else:
+        spoiler = False
+
+    originalContent = input('Mark as OC? (y/n) ')
+    if originalContent == 'y':
+        originalContent = True
+    else:
+        originalContent = False
+
+    NSFW = input('Mark as NSFW? (y/n) ')
+    if NSFW == 'y':
+        NSFW = True
+    else:
+        NSFW = False
+    
+    with open('subredditList.txt') as f:
+        subreddits = f.read().splitlines()
+
+    print('creating post')
+    return post_options(title, subreddits, path, url, flair, inboxReplies, spoiler, originalContent, NSFW)
+
 
 
 def multiple_subreddit_post():
     projectPath = os.path.dirname(os.path.realpath(__file__))
     authFile = projectPath + "/auth.ini"
-    config = configparser.ConfigParser
+    config = configparser.ConfigParser()
 
     redditClient = reddit_authentication(config)
-    subreddit = redditClient.subreddit("sub")
 
-    for subreddit in subsToPost:
+    postOptions = create_post()
+    print(type(postOptions.getSubreddits))
+    for subreddit in postOptions.getSubreddits:
         redditClient.post(title = postOptions.title, spoiler = postOptions.spoiler, subreddit = postOptions.subreddit, is_original_content = postOptions.orignalContent, over_18 = postOptions.NSFW)
+
+
+multiple_subreddit_post()
