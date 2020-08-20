@@ -16,7 +16,7 @@ def reddit_authentication(config):
 
 
 
-class post_options():
+class post_options:
     def __init__(self, title, subreddits, url = '', path = '', flair = '', inboxReplies = True, spoiler = False, originalContent = False, NSFW = False):
         self.inboxReplies = inboxReplies
         self.spoiler = spoiler
@@ -65,8 +65,8 @@ def create_post():
     else:
         NSFW = False
     
-    with open('subredditList.txt') as f:
-        subreddits = f.read().splitlines()
+    subreddits = [line.strip() for line in open("subredditList.txt", 'r')]
+    print(subreddits[1])
 
     print('creating post')
     return post_options(title, subreddits, path, url, flair, inboxReplies, spoiler, originalContent, NSFW)
@@ -81,9 +81,9 @@ def multiple_subreddit_post():
     redditClient = reddit_authentication(config)
 
     postOptions = create_post()
-    print(type(postOptions.getSubreddits))
-    for subreddit in postOptions.getSubreddits:
-        redditClient.post(title = postOptions.title, spoiler = postOptions.spoiler, subreddit = postOptions.subreddit, is_original_content = postOptions.orignalContent, over_18 = postOptions.NSFW)
+    for subreddit in postOptions.subreddits:
+        subToPostTo = redditClient.subreddit(subreddit)
+        subToPostTo.submit(title = postOptions.title, spoiler = postOptions.spoiler, is_original_content = postOptions.originalContent, over_18 = postOptions.NSFW)
 
 
 multiple_subreddit_post()
